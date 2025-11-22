@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>职场绿洲 - Office Oasis</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        /* --- 🌿 疗愈系视觉系统 (响应式增强版) --- */
+        :root {
+            --primary: #6B8E23; --primary-light: #E8F5E9;
+            --bg: #FDFCF8; --text: #4A4036; --sub-text: #8C857B;
+            --card-bg: #FFFFFF; --accent: #FFB74D;
+            --shadow: 0 10px 30px -5px rgba(107, 142, 35, 0.1);
+        }
+
+        body {
+            margin: 0; font-family: "Nunito", "Segoe UI", sans-serif;
+            background: var(--bg); color: var(--text);
+            min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+            padding: 20px; box-sizing: border-box;
+        }
+
+        /* 响应式容器 */
+        .app-container {
+            width: 100%; max-width: 1200px;
+            display: flex; flex-direction: column; gap: 30px;
+        }
+
+        /* 顶部栏 */
+        .header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding-bottom: 20px; border-bottom: 2px dashed #E0E0E0;
+        }
+        .logo { font-size: 1.5rem; font-weight: 900; color: var(--primary); display: flex; align-items: center; gap: 10px; }
+        .timer {
+            background: var(--primary-light); color: var(--primary);
+            padding: 8px 16px; border-radius: 50px; font-weight: bold; font-family: monospace;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .dot { width: 8px; height: 8px; background: var(--primary); border-radius: 50%; animation: pulse 2s infinite; }
+
+        /* 菜单网格 (响应式核心) */
+        .menu-grid {
+            display: grid; gap: 25px;
+            /* 电脑端3列，手机端1列 */
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        }
+
+        .menu-card {
+            background: var(--card-bg); border-radius: 24px; padding: 30px;
+            box-shadow: var(--shadow); cursor: pointer; transition: all 0.3s;
+            border: 2px solid transparent; min-height: 220px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+        }
+        .menu-card:hover { transform: translateY(-5px); border-color: var(--primary); }
+        
+        .icon { font-size: 3.5rem; margin-bottom: 15px; }
+        .card-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 8px; color: var(--text); }
+        .card-desc { font-size: 0.9rem; color: var(--sub-text); line-height: 1.5; }
+
+        /* 模块视图 */
+        .module-container {
+            display: none; /* 默认隐藏 */
+            width: 100%; max-width: 600px; margin: 0 auto;
+            background: #FFF; border-radius: 30px; padding: 40px;
+            box-shadow: var(--shadow); text-align: center; min-height: 500px;
+            flex-direction: column; align-items: center; justify-content: center;
+            position: relative; border: 1px solid #EEE;
+        }
+        
+        .back-btn {
+            position: absolute; top: 20px; left: 20px;
+            background: #F5F5F5; border: none; padding: 8px 15px; border-radius: 20px;
+            cursor: pointer; color: var(--sub-text); font-weight: bold; transition: 0.2s;
+        }
+        .back-btn:hover { background: #E0E0E0; color: var(--text); }
+
+        .action-btn {
+            padding: 15px 40px; border-radius: 50px; border: none;
+            font-size: 1.1rem; font-weight: bold; cursor: pointer; margin-top: 30px;
+            color: white; box-shadow: 0 8px 20px rgba(0,0,0,0.15); transition: transform 0.1s;
+        }
+        .action-btn:active { transform: scale(0.95); }
+
+        /* 动画 */
+        @keyframes pulse { 0% {opacity:1} 50% {opacity:0.5} 100% {opacity:1} }
+        @keyframes fadeIn { from {opacity:0; transform:translateY(10px)} to {opacity:1; transform:translateY(0)} }
+        .fade-in { animation: fadeIn 0.4s ease-out; }
+        
+        /* 进度条 */
+        .progress-bg { width: 200px; height: 6px; background: #EEE; border-radius: 3px; margin: 20px auto; overflow: hidden; display: none; }
+        .progress-bar { width: 0%; height: 100%; background: var(--primary); transition: width 1.5s linear; }
+
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    
+    <div class="header">
+        <div class="logo">🏝️ Office Oasis</div>
+        <div class="timer">
+            <div class="dot"></div>
+            <span id="countdown">15:00</span>
+        </div>
+    </div>
+
+    <div id="main-menu" class="menu-grid fade-in">
+        <div class="menu-card" onclick="openModule('stress')">
+            <div class="icon">💥</div>
+            <div class="card-title">情绪粉碎机</div>
+            <div class="card-desc">一键物理超度烦恼<br>无需输入 · 隐私安全</div>
+        </div>
+        <div class="menu-card" onclick="openModule('learn')">
+            <div class="icon">☕</div>
+            <div class="card-title">知识特调饮</div>
+            <div class="card-desc">每日一杯职场干货<br>3分钟微技能</div>
+        </div>
+        <div class="menu-card" onclick="openModule('social')">
+            <div class="icon">🍾</div>
+            <div class="card-title">同事漂流瓶</div>
+            <div class="card-desc">看看隔壁在吐槽啥<br>完全匿名</div>
+        </div>
+    </div>
+
+    <div id="mod-stress" class="module-container">
+        <button class="back-btn" onclick="goHome()">← 返回</button>
+        <div id="stress-step-1">
+            <div style="font-size:5rem; margin-bottom:20px;">🤯</div>
+            <h2 style="color:#EF5350; margin:0;">情绪粉碎机</h2>
+            <p style="color:#888; margin-bottom:30px;">累了吗？不用打字倾诉，点击按钮，我们将烦恼粉碎。</p>
+            <button class="action-btn" style="background:#EF5350;" onclick="smashStress()">⚡ 一键消除班味</button>
+        </div>
+        <div id="stress-step-2" style="display:none;">
+            <div style="background:#FFF3E0; padding:30px; border-radius:20px; border:2px dashed #FFB74D;">
+                <h3 id="quote-title" style="color:#E65100; margin-top:0;"></h3>
+                <p id="quote-content" style="font-size:1.1rem; line-height:1.6; color:#5D4037;"></p>
+            </div>
+            <button class="action-btn" style="background:#FFB74D;" onclick="resetStress()">🔄 再碎一个</button>
+        </div>
+    </div>
+
+    <div id="mod-learn" class="module-container">
+        <button class="back-btn" onclick="goHome()">← 返回</button>
+        <div id="learn-step-1">
+            <div style="font-size:5rem; margin-bottom:20px;">☕</div>
+            <h2 style="color:#6B8E23; margin:0;">知识特调饮</h2>
+            <p style="color:#888; margin-bottom:30px;">正在为您萃取今日份的职场智慧...</p>
+            
+            <div id="brew-progress" class="progress-bg">
+                <div class="progress-bar" id="brew-bar"></div>
+            </div>
+
+            <div id="tip-card" style="display:none; background:#F1F8E9; padding:30px; border-radius:20px; margin-top:20px;">
+                <div id="tip-text" style="font-size:1.2rem; font-weight:bold; color:#33691E;"></div>
+            </div>
+
+            <button id="btn-brew" class="action-btn" style="background:#6B8E23;" onclick="startBrew()">🚀 开始冲泡</button>
+        </div>
+    </div>
+
+    <div id="mod-social" class="module-container">
+        <button class="back-btn" onclick="goHome()">← 返回</button>
+        <div style="font-size:5rem; margin-bottom:10px;">🍾</div>
+        <h2 style="color:#29B6F6; margin:0 0 20px 0;">同事漂流瓶</h2>
+        
+        <div style="background:#E1F5FE; padding:30px; border-radius:20px; width:100%; box-sizing:border-box; margin-bottom:20px;">
+            <div id="bottle-text" style="font-size:1.2rem; font-weight:bold; color:#01579B; font-style:italic;">
+                点击下方按钮捞取...
+            </div>
+            <div id="bottle-author" style="font-size:0.9rem; color:#0288D1; margin-top:10px; display:none;"></div>
+        </div>
+
+        <div style="display:flex; gap:10px; width:100%;">
+            <button class="action-btn" style="background:#4FC3F7; flex:1; margin-top:0;" onclick="throwBottle()">扔一个</button>
+            <button class="action-btn" style="background:#039BE5; flex:1; margin-top:0;" onclick="fishBottle()">捞一个</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // --- 数据源 ---
+    const QUOTES = [
+        { t: "不想上班？", c: "没事，蹭蹭公司空调也是赚！带薪难过也是一种赚钱方式。" },
+        { t: "听不懂需求？", c: "别气，就把这当成是‘义务支教’，日行一善积功德。" },
+        { t: "老板画饼？", c: "他画他的，你吃你的真烧饼。胃饱了，心就不慌了。" },
+        { t: "方案被毙？", c: "恭喜！你离‘最终定稿_死都不改_版.ppt’又近了一步。" },
+        { t: "同事太卷？", c: "他卷任他卷，清风拂山岗。他在演戏，你在看戏，挺好。" },
+        { t: "周一综合症？", c: "你的出厂设置是享受生活，现在的卡顿是因为运行了‘赚钱’这个高耗能程序。" }
+    ];
+
+    const TIPS = [
+        "💡 Excel: Alt+= 一键求和，F4 重复上一步操作。",
+        "🧠 心理学: '蔡格尼克效应'——人对未完成的任务记忆更深。",
+        "👀 健康: 20-20-20法则：每20分钟看20米远20秒。",
+        "🗣️ 沟通: 把'我以为'改成'我的理解是'，专业度+50%。",
+        "⌨️ 摸鱼: Win+D 一键回桌面，Win+L 一键锁屏。",
+        "🎨 设计: 颜色搭配绝招——直接吸取大自然图片的颜色。"
+    ];
+
+    const BOTTLES = [
+        "茶水间的微波炉是谁炸了？一股榴莲味！",
+        "听说隔壁组下个月去海边团建，羡慕哭...",
+        "年假能不能折现啊？在线等，挺急的。",
+        "发现一个摸鱼圣地：18楼的消防通道，信号贼好。",
+        "中午吃什么？这是每天最难的决策。"
+    ];
+
+    // --- 导航逻辑 ---
+    function openModule(id) {
+        document.getElementById('main-menu').style.display = 'none';
+        document.querySelectorAll('.module-container').forEach(el => el.style.display = 'none');
+        document.getElementById('mod-' + id).style.display = 'flex';
+        
+        // 重置状态
+        if(id === 'stress') resetStress();
+        if(id === 'learn') resetLearn();
+    }
+
+    function goHome() {
+        document.querySelectorAll('.module-container').forEach(el => el.style.display = 'none');
+        document.getElementById('main-menu').style.display = 'grid';
+    }
+
+    // --- 倒计时 ---
+    let time = 900;
+    setInterval(() => {
+        if(time > 0) time--;
+        const m = Math.floor(time/60).toString().padStart(2,'0');
+        const s = (time%60).toString().padStart(2,'0');
+        document.getElementById('countdown').innerText = `${m}:${s}`;
+    }, 1000);
+
+    // --- 模块逻辑 ---
+    
+    // 1. 情绪粉碎机
+    function smashStress() {
+        // 特效
+        confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#EF5350', '#FFCA28'] });
+        
+        const item = QUOTES[Math.floor(Math.random() * QUOTES.length)];
+        document.getElementById('quote-title').innerText = item.t;
+        document.getElementById('quote-content').innerText = item.c;
+        
+        document.getElementById('stress-step-1').style.display = 'none';
+        document.getElementById('stress-step-2').style.display = 'block';
+        document.getElementById('stress-step-2').classList.add('fade-in');
+    }
+
+    function resetStress() {
+        document.getElementById('stress-step-1').style.display = 'block';
+        document.getElementById('stress-step-2').style.display = 'none';
+    }
+
+    // 2. 知识特调
+    function startBrew() {
+        const bar = document.getElementById('brew-bar');
+        const bg = document.getElementById('brew-progress');
+        const btn = document.getElementById('btn-brew');
+        const card = document.getElementById('tip-card');
+        
+        bg.style.display = 'block';
+        btn.style.display = 'none';
+        card.style.display = 'none';
+        
+        // 动画
+        setTimeout(() => { bar.style.width = '100%'; }, 100);
+        
+        setTimeout(() => {
+            const tip = TIPS[Math.floor(Math.random() * TIPS.length)];
+            document.getElementById('tip-text').innerText = tip;
+            
+            bg.style.display = 'none';
+            bar.style.width = '0%';
+            card.style.display = 'block';
+            card.classList.add('fade-in');
+            
+            btn.innerText = "再续一杯";
+            btn.style.display = 'inline-block';
+        }, 1500);
+    }
+    
+    function resetLearn() {
+        document.getElementById('tip-card').style.display = 'none';
+        document.getElementById('btn-brew').innerText = "开始冲泡";
+        document.getElementById('btn-brew').style.display = 'inline-block';
+    }
+
+    // 3. 漂流瓶
+    function fishBottle() {
+        const txt = BOTTLES[Math.floor(Math.random() * BOTTLES.length)];
+        const name = `路人甲_${Math.floor(Math.random()*999)}`;
+        
+        const txtEl = document.getElementById('bottle-text');
+        const authEl = document.getElementById('bottle-author');
+        
+        txtEl.innerText = `"${txt}"`;
+        authEl.innerText = `来自: ${name}`;
+        authEl.style.display = 'block';
+        txtEl.parentElement.classList.add('fade-in');
+        
+        // 重置动画类以便下次播放
+        setTimeout(() => txtEl.parentElement.classList.remove('fade-in'), 500);
+    }
+
+    function throwBottle() {
+        const name = `路人甲_${Math.floor(Math.random()*999)}`;
+        alert(`✅ 已匿名抛出！\n代号：${name}\n(放心，没人知道是你)`);
+    }
+
+    // 挂载到window
+    window.openModule = openModule;
+    window.goHome = goHome;
+    window.smashStress = smashStress;
+    window.resetStress = resetStress;
+    window.startBrew = startBrew;
+    window.fishBottle = fishBottle;
+    window.throwBottle = throwBottle;
+</script>
+</body>
+</html>
